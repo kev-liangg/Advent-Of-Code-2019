@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fstream>
 
-int main() {
+int main () {
     std::ifstream inFile ("input.txt");
     std::string line;
 
@@ -19,13 +19,13 @@ int main() {
         total += mass / 3 - 2;
     }
 
-    printf("Part 1 solution: %d\n", total);
+    printf ("Part 1 solution: %d\n", total);
 
     /* Part 2: -------------------------------------------------------------- */
 
     // reset file and totals
-    inFile.clear();
-    inFile.seekg(0, std::ios::beg);
+    inFile.clear ();
+    inFile.seekg (0, std::ios::beg);
     total = 0;
 
     while (std::getline (inFile, line)) {
@@ -40,7 +40,7 @@ int main() {
         }
     }
 
-    printf("Part 2 solution: %d\n", total);
+    printf ("Part 2 solution: %d\n", total);
 
     return 0;
 }
