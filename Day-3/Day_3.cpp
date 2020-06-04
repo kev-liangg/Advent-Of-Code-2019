@@ -48,6 +48,7 @@ int main () {
         while (std::getline (inStream, inputElem, ',')) {
             // create new vertex and link to last temporary vertex
             Vertex *vertexNew = getNextVertex (inputElem, vertexTemp);
+            printf("(%d, %d)\n", vertexNew->x, vertexNew->y);
             vertexTemp->next = vertexNew;
             vertexTemp = vertexNew;
         }
@@ -60,6 +61,7 @@ int main () {
     int minDistance = std::numeric_limits<int>::max ();
     bool first = true;
     while (vertex1->next != NULL) {
+        vertex2 = vertexStart.at (1);
         while (vertex2->next != NULL) {
             int result = intersectDistance (vertex1, vertex1->next,
                                             vertex2, vertex2->next);
@@ -78,48 +80,54 @@ int main () {
     /* Part 2: -------------------------------------------------------------- */
     // reuse code from part 1, but early return at "first" intersect
     // this will be the earliest point, as all vertices stored in relative order
-    vertex1 = vertexStart.at (0);
-    vertex2 = vertexStart.at (1);
     minDistance = std::numeric_limits<int>::max ();
-
     first = true;
     bool done = false;
-    int totalSteps = 0;
+    vertex1 = vertexStart.at (0);
+    // track displacement for path 1
+    int totalSteps1 = 0;
     while (vertex1->next != NULL && !done) {
+        // track displacement for path 2
+        int totalSteps2 = 0;
+        vertex2 = vertexStart.at (1);
         while (vertex2->next != NULL && !done) {
             int result = intersectDistance (vertex1, vertex1->next,
                                             vertex2, vertex2->next);
             // dirty fix: ignore 0 result from initial intersect
             if (!first && result < minDistance) {
                 // case 1: path 1 is vertical. path 1 gives x, path 2 gives y
-//                if (vertex1->y == vertex1->next->y) {
-//                    totalSteps += std::abs (vertex1->x - vertex2->x);
-//                    totalSteps += std::abs (vertex2->y - vertex1->y);
-//                }
-//                // case 2: path 2 is vertical. path 2 gives x, path 1 gives y
-//                else {
-//                    totalSteps += std::abs (vertex2->x - vertex1->x);
-//                    totalSteps += std::abs (vertex1->y - vertex2->y);
-//                }
+                if (vertex1->y == vertex1->next->y) {
+                    totalSteps2 += std::abs (vertex1->x - vertex2->x);
+                    totalSteps1 += std::abs (vertex2->y - vertex1->y);
+                }
+                // case 2: path 2 is vertical. path 2 gives x, path 1 gives y
+                else {
+                    totalSteps1 += std::abs (vertex2->x - vertex1->x);
+                    totalSteps2 += std::abs (vertex1->y - vertex2->y);
+                }
+                // combine the steps for path 1 and 2, for solution
+                printf("total steps path 1: %d\n", totalSteps1);
+                totalSteps1 += totalSteps2;
                 done = true;
             }
+            printf("total steps path 2: %d\n", totalSteps2);
             if (!done) {
                 // update displacement before moving to next vertex
-                totalSteps += std::abs (vertex2->x - vertex1->next->x);
-                totalSteps += std::abs (vertex2->y - vertex1->next->y);
+                totalSteps2 += std::abs (vertex2->x - vertex2->next->x);
+                totalSteps2 += std::abs (vertex2->y - vertex2->next->y);
 
                 vertex2 = vertex2->next;
                 first = false;
             }
         }
         if (!done) {
-            totalSteps += std::abs (vertex1->x - vertex1->next->x);
-            totalSteps += std::abs (vertex1->y - vertex1->next->y);
+            totalSteps1 += std::abs (vertex1->x - vertex1->next->x);
+            totalSteps1 += std::abs (vertex1->y - vertex1->next->y);
             vertex1 = vertex1->next;
         }
     }
 
-    printf ("Part 2 Solution: %d\n", totalSteps);
+    printf ("Part 2 Solution: %d\n", totalSteps1);
 
     /* Both parts completed: Clean up allocated memory ---------------------- */
 }
@@ -139,10 +147,10 @@ Vertex* getNextVertex (std::string &inputElem, Vertex *vertexLast) {
         newY -= magnitude;
     }
     else if (direction == 'L') {
-        newX += magnitude;
+        newX -= magnitude;
     }
     else if (direction == 'R') {
-        newX -= magnitude;
+        newX += magnitude;
     }
     else {
         printf("Invalid direction, input may be invalid!\n");
@@ -172,7 +180,7 @@ int intersectDistance (Vertex *b1, Vertex *e1, Vertex *b2, Vertex *e2) {
         }
     }
     // path 2 horizontal, path 1 vertical
-    else if (b2->y == e2->y && b1->x == b2->x) {
+    else if (b2->y == e2->y && b1->x == e1->x) {
         // vertical x values must be between two horizontal x values, vice versa
         if (between (b1->x, b2->x, e2->x) && between (b2->y, b1->y, e1->y)) {
             printf("intersect: %d, %d\n", b1->x, b2->y);
