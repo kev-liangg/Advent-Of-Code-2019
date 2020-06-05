@@ -48,7 +48,6 @@ int main () {
         while (std::getline (inStream, inputElem, ',')) {
             // create new vertex and link to last temporary vertex
             Vertex *vertexNew = getNextVertex (inputElem, vertexTemp);
-            printf("(%d, %d)\n", vertexNew->x, vertexNew->y);
             vertexTemp->next = vertexNew;
             vertexTemp = vertexNew;
         }
@@ -106,11 +105,9 @@ int main () {
                     totalSteps2 += std::abs (vertex1->y - vertex2->y);
                 }
                 // combine the steps for path 1 and 2, for solution
-                printf("total steps path 1: %d\n", totalSteps1);
                 totalSteps1 += totalSteps2;
                 done = true;
             }
-            printf("total steps path 2: %d\n", totalSteps2);
             if (!done) {
                 // update displacement before moving to next vertex
                 totalSteps2 += std::abs (vertex2->x - vertex2->next->x);
@@ -130,6 +127,13 @@ int main () {
     printf ("Part 2 Solution: %d\n", totalSteps1);
 
     /* Both parts completed: Clean up allocated memory ---------------------- */
+    for (Vertex *toDelete : vertexStart) {
+        while (toDelete != NULL) {
+            Vertex *vertexTemp = toDelete->next;
+            delete toDelete;
+            toDelete = vertexTemp;
+        }
+    }
 }
 
 Vertex* getNextVertex (std::string &inputElem, Vertex *vertexLast) {
@@ -172,9 +176,6 @@ int intersectDistance (Vertex *b1, Vertex *e1, Vertex *b2, Vertex *e2) {
     if (b1->y == e1->y && b2->x == e2->x) {
         // vertical x values must be between two horizontal x values, vice versa
         if (between (b2->x, b1->x, e1->x) && between (b1->y, b2->y, e2->y)) {
-            printf("intersect: %d, %d\n", b2->x, b1->y);
-            printf("path 1 horizontal, begin x %d\n", b1->x);
-            printf("path 2 vertical, begin y %d\n", b2->y);
             // intersect point given by path 1 y coord, path 2 x coord
             return std::abs (b2->x) + std::abs (b1->y);
         }
@@ -183,7 +184,6 @@ int intersectDistance (Vertex *b1, Vertex *e1, Vertex *b2, Vertex *e2) {
     else if (b2->y == e2->y && b1->x == e1->x) {
         // vertical x values must be between two horizontal x values, vice versa
         if (between (b1->x, b2->x, e2->x) && between (b2->y, b1->y, e1->y)) {
-            printf("intersect: %d, %d\n", b1->x, b2->y);
             // intersect point given by path 2 y coord, path 1 x coord
             return std::abs (b2->y) + std::abs (b1->x);
         }
