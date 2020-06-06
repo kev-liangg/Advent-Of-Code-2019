@@ -95,41 +95,59 @@ int runOpcode (std::vector<int> &inputVals, int index, int input) {
     // obtain param modes and final opcode from parse helper
     int mode1, mode2, mode3;
     parseOpcode (opcode, mode1, mode2, mode3);
-    // opcode 99: halt, return size of input to break out of caller while
-    if (opcode == 99) {
-        return inputVals.size ();
-    }
-    // valid opcodes from Day 2: 1, 2
-    else if (opcode == 1 || opcode == 2) {
-        // get value of next 3 params for the operation
-        int param1 = inputVals.at (index + 1);
-        int param2 = inputVals.at (index + 2);
-        int writeIndex = inputVals.at (index + 3);
-        // actual values for operation differs by mode: 0->index, 1->immediate
-        int val1 = mode1 ? param1 : inputVals.at (param1);
-        int val2 = mode2 ? param2 : inputVals.at (param2);
-        // opcode 1: add vals; otherwise opcode 2: multiply vals
-        int toWrite = (opcode == 1) ? val1 + val2 : val1 * val2;
-        // write calculated value to index; always in indexing mode
-        inputVals.at (writeIndex) = toWrite;
-        offset = 4;
-    }
-    // new opcode 3: write to position given by only parameter
-    else if (opcode == 3) {
-        int writeIndex = inputVals.at (index + 1);
-        inputVals.at (writeIndex) = input;
-        offset = 2;
-    }
-    // new opcode 4: "outputs" from its only parameter
-    else if (opcode == 4) {
-        int param1 = inputVals.at (index + 1);
-        // value to output differs by mode: 0->index, 1->intermediate
-        int valOut = mode1 ? param1 : inputVals.at (param1);
-        printf("output: %d\n", valOut);
-        offset = 2;
-    }
-    else {
-        printf ("invalid opcode, error in input\n");
+    switch (opcode) {
+        // opcode 99: halt, return size to break out of caller loop
+        case 99 :
+            offset = inputVals.size ();
+            break;
+        // opcode 1 and 2 both valid opcodes from Day 2
+        case 1 :
+        case 2 : {
+            // get value of next 3 params for the operation
+            int param1 = inputVals.at (index + 1);
+            int param2 = inputVals.at (index + 2);
+            int writeIndex = inputVals.at (index + 3);
+            // actual values for operation differs by mode: 0->index, 1->immediate
+            int val1 = mode1 ? param1 : inputVals.at (param1);
+            int val2 = mode2 ? param2 : inputVals.at (param2);
+            // opcode 1: add vals; otherwise opcode 2: multiply vals
+            int toWrite = (opcode == 1) ? val1 + val2 : val1 * val2;
+            // write calculated value to index; always in indexing mode
+            inputVals.at (writeIndex) = toWrite;
+            offset = 4;
+            break;
+        }
+        // part 1, opcode 3: write to position given by single param
+        case 3 : {
+            int writeIndex = inputVals.at (index + 1);
+            inputVals.at (writeIndex) = input;
+            offset = 2;
+            break;
+        }
+        // part 1, opcode 4: "output" from single param and mode
+        case 4 : {
+            int param1 = inputVals.at (index + 1);
+            // value to output differs by mode: 0->index, 1->intermediate
+            int valOut = mode1 ? param1 : inputVals.at (param1);
+            printf("output: %d\n", valOut);
+            offset = 2;
+            break;
+        }
+        // part 2, opcode 5:
+        case 5 :
+            break;
+        // part 2, opcode 6:
+        case 6 :
+            break;
+        // part 2, opcode 7:
+        case 7 :
+            break;
+        // part 2, opcode 8:
+        case 8 :
+            break;
+        default :
+            printf ("invalid opcode, error in input\n");
+            break;
     }
     // return program counter to determine next index of opcode for caller
     return offset;
