@@ -29,7 +29,7 @@ struct Object {
  * returns the pointer of the object under the name.
  */
 Object* findObject (std::unordered_map<std::string, Object*> &objects,
-                  std::string objectName);
+                  std::string &objectName);
 
 /*
  * recursively totals the number of direct and indirect orbits for an object
@@ -51,7 +51,7 @@ int main () {
     while (std::getline (inFile, line)) {
         // object on the right directly orbits object on the left
         std::string base = line.substr (0, 3);
-        std::string orbiter = line.substr (4, 7);
+        std::string orbiter = line.substr (4, 3);
         Object *objectBase = findObject (objects, base);
         Object *objectOrbiter = findObject (objects, orbiter);
         // link the two objects by their direct orbit
@@ -59,8 +59,8 @@ int main () {
         objectOrbiter->orbiting = objectBase;
         objectBase->name = base;
         objectOrbiter->name = orbiter;
-        std::cout << base << " " << objectBase << "\n";
-        std::cout << orbiter << "\n" << objectOrbiter << "\n";
+//        std::cout << base << " " << objectBase << "\n";
+//        std::cout << orbiter << "\n" << objectOrbiter << "\n";
     }
 
     /* Part 1: -------------------------------------------------------------- */
@@ -82,8 +82,6 @@ int countOrbits (Object *base) {
 }
 
 Object* findRoot (Object *child) {
-    std::cout << child->name << " ";
-    std::cout << child << "\n";
     // simple recursive call from child objects until highest parent is reached
     if (child->orbiting == nullptr) {
         return child;
@@ -94,7 +92,7 @@ Object* findRoot (Object *child) {
 }
 
 Object* findObject (std::unordered_map<std::string, Object*> &objects,
-                    std::string objectName) {
+                    std::string &objectName) {
     // iterator for unordered map lookup
     std::unordered_map<std::string, Object*>::const_iterator search;
     search = objects.find (objectName);
@@ -102,8 +100,7 @@ Object* findObject (std::unordered_map<std::string, Object*> &objects,
     Object *pObject;
     if (search == objects.end ()) {
         pObject = new Object;
-        std::pair<std::string, Object*> toInsert (objectName, pObject);
-        objects.insert (toInsert);
+        objects.insert (std::make_pair(objectName, pObject));
     }
     else {
         pObject = search->second;
