@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 /*
  * each object contains a list of all the other objects that directly orbit it.
@@ -19,6 +20,8 @@
 struct Object {
     std::vector<Object*> orbits;
     Object *orbiting;
+    // part 2: searching across objects, needs flag to check if already searched
+    bool searched;
 };
 
 /*
@@ -37,10 +40,10 @@ Object* findObject (std::unordered_map<std::string, Object*> &objects,
 int countOrbits (Object *base);
 
 /*
- * recursively determines the center of mass object, the one object that does
- * not orbit any other object. takes any object in the list of input.
+ * recursive backtracking solution to determine the shortest distance between
+ * any two objects, determined by number of intermediate objects between
  */
-Object* findRoot (Object *child);
+int search (Object *start, Object *target, int currDistance);
 
 int main () {
     // mapping of an object's name to the location of its corresponding struct
@@ -48,6 +51,9 @@ int main () {
 
     std::ifstream inFile ("input.txt");
     std::string line;
+    // part 2: need to identify starting position and target position
+    Object *start = nullptr;
+    Object *target = nullptr;
     while (std::getline (inFile, line)) {
         // object on the right directly orbits object on the left
         std::string base = line.substr (0, 3);
@@ -57,6 +63,13 @@ int main () {
         // link the two objects by their direct orbit
         objectBase->orbits.push_back (objectOrbiter);
         objectOrbiter->orbiting = objectBase;
+        // check for start/target names; only consider base object in this case
+        if (orbiter == "SAN") {
+            target = objectBase;
+        }
+        if (orbiter == "YOU") {
+            start = objectBase;
+        }
     }
 
     /* Part 1: -------------------------------------------------------------- */
@@ -70,6 +83,9 @@ int main () {
     printf ("Part 1 Solution: %d\n", totalOrbits);
 
     /* Part 2: -------------------------------------------------------------- */
+
+    // search for shortest path between start and target objects
+    printf ("Part 2 Solution: %d\n", search (start, target, 0));
 }
 
 int countOrbits (Object *base) {
@@ -82,14 +98,29 @@ int countOrbits (Object *base) {
     return numDirect + numIndirect;
 }
 
-Object* findRoot (Object *child) {
-    // simple recursive call from child objects until highest parent is reached
-    if (child->orbiting == nullptr) {
-        return child;
+int search (Object *current, Object *target, int currDistance) {
+    // check if reached target
+    if (current == target) {
+        return currDistance;
     }
-    else {
-        return findRoot (child->orbiting);
+    // mark current object as visited
+    current->searched = true;
+    // check orbiting object, if not null
+    int currMin = std::numeric_limits<int>::max ();
+    if (current->orbiting != nullptr && !current->orbiting->searched) {
+        currMin = search (current->orbiting, target, currDistance + 1);
     }
+    // check all orbiting objects
+    for (Object *orbiter : current->orbits) {
+        if (!orbiter->searched) {
+            int result = search (orbiter, target, currDistance + 1);
+
+            if (result < currMin) {
+                currMin = result;
+            }
+        }
+    }
+    return currMin;
 }
 
 Object* findObject (std::unordered_map<std::string, Object*> &objects,
