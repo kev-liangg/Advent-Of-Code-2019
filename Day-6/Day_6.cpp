@@ -17,7 +17,6 @@
  * an object also stores the object that it directly orbits.
  */
 struct Object {
-    std::string name;
     std::vector<Object*> orbits;
     Object *orbiting;
 };
@@ -32,7 +31,8 @@ Object* findObject (std::unordered_map<std::string, Object*> &objects,
                   std::string &objectName);
 
 /*
- * recursively totals the number of direct and indirect orbits for an object
+ * recursively totals the number of direct and indirect orbits around a single
+ * object
  */
 int countOrbits (Object *base);
 
@@ -46,7 +46,7 @@ int main () {
     // mapping of an object's name to the location of its corresponding struct
     std::unordered_map<std::string, Object*> objects;
 
-    std::ifstream inFile ("inputSmall.txt");
+    std::ifstream inFile ("input.txt");
     std::string line;
     while (std::getline (inFile, line)) {
         // object on the right directly orbits object on the left
@@ -57,18 +57,19 @@ int main () {
         // link the two objects by their direct orbit
         objectBase->orbits.push_back (objectOrbiter);
         objectOrbiter->orbiting = objectBase;
-        objectBase->name = base;
-        objectOrbiter->name = orbiter;
-//        std::cout << base << " " << objectBase << "\n";
-//        std::cout << orbiter << "\n" << objectOrbiter << "\n";
     }
 
     /* Part 1: -------------------------------------------------------------- */
 
-    // determine center of mass object, call helper function with any map value
-    Object *root = findRoot (objects.begin ()->second);
-    // count all orbits of the center of mass for solution
-    printf ("Part 1 Solution: %d\n", countOrbits (root));
+    int totalOrbits = 0;
+    // must call counting function starting from every object in the map
+    for (std::pair<std::string, Object*> entry : objects) {
+        totalOrbits += countOrbits (entry.second);
+    }
+    // counted all direct/indirect orbits around every object
+    printf ("Part 1 Solution: %d\n", totalOrbits);
+
+    /* Part 2: -------------------------------------------------------------- */
 }
 
 int countOrbits (Object *base) {
