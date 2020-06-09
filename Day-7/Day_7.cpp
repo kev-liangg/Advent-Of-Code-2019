@@ -68,7 +68,6 @@ int main () {
     }
 
 //    /* Part 1: -------------------------------------------------------------- */
-//
     int sequence[] = {0, 1, 2, 3, 4};
     int maxOutput = 0;
     // check all permutations of sequence
@@ -99,6 +98,7 @@ int main () {
 
 int runSequence (int sequence[], std::vector<int> &inputFixed) {
     std::vector<int> inputVals;
+
     // second input starts at 0 for the first iteration
     int input2 = 0;
     for (int i = 0; i < 5; i++) {
@@ -116,7 +116,7 @@ int runLoop (int sequence[], std::vector<int> &inputFixed) {
     std::vector<std::vector<int>> inputValsAll;
     for (int i = 0; i < 5; i++) {
         std::vector<int> toAdd (inputFixed.begin (), inputFixed.end ());
-        toAdd.push_back(0);
+        toAdd.push_back (0);
         inputValsAll.push_back (toAdd);
     }
     // each module can execute only two write instructions, then must wait
@@ -133,8 +133,9 @@ int runLoop (int sequence[], std::vector<int> &inputFixed) {
                                    input2, writeCounts[i % 5]);
         // check if amplifier step finished by checking for magic number
         if (inputValsAll.at (i % 5).back () == 99999) {
-            numFinished ++;
+            numFinished++;
         }
+
         i++;
     }
     // finished iterations, last result stored in input 2
@@ -238,7 +239,6 @@ int runOpcode (std::vector<int> &inputVals, int &index, int input,
     }
     // must access final 3 values based on the utilized params for each case
     int val1, val2, val3;
-//    printf("executing index: %d, opcode %d\n", index, opcode);
     switch (opcode) {
         // opcode 99: halt, return size to break out of caller loop
         case 99 :
