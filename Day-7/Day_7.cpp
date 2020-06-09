@@ -16,7 +16,7 @@
  * process the inputs given by opcodes and entries within the input values
  * pass vector by reference for performance
  *
- * Day 7 update: no longer takes a single input. After the first input
+ * Day 7 update: no inter takes a single input. After the first input
  * instruction is processed, following inputs will switch to a second input
  * value.
  *
@@ -26,13 +26,13 @@
  * Returns the value of the output, rather than printing it
  */
 int processInput (std::vector<int> &inputVals, int input1, int input2);
-long processInputLoop (std::vector<int> &inputVals, int input1, long input2,
+int processInputLoop (std::vector<int> &inputVals, int input1, int input2,
                        int &writeCount);
 
 /*
  * Run the sequence of five execution sequences and outputs the final result
  */
-long runSequence (int sequence[], std::vector<int> &inputFixed);
+int runSequence (int sequence[], std::vector<int> &inputFixed);
 
 /*
  * Part 2: runs according to the feedback loop
@@ -54,8 +54,8 @@ void parseOpcode (int &opcode, int &mode1, int &mode2, int &mode3);
  *
  * returns the "program counter increment," the offset to the next opcode
  */
-int runOpcode (std::vector<int> &inputVals, int &index, long input,
-               int &writeCount, bool &waitFlag, long &output);
+int runOpcode (std::vector<int> &inputVals, int &index, int input,
+               int &writeCount, bool &waitFlag, int &output);
 
 int main () {
     std::ifstream inFile ("input.txt");
@@ -69,21 +69,21 @@ int main () {
 
 //    /* Part 1: -------------------------------------------------------------- */
 //
-//    int sequence[] = {0, 1, 2, 3, 4};
-    long maxOutput = 0;
-//    // check all permutations of sequence
-//    do {
-//        int result = runSequence (sequence, inputVals);
-//        if (result > maxOutput) {
-//            maxOutput = result;
-//        }
-//    } while (std::next_permutation (sequence, sequence + 5));
-//
-//    printf ("Part 1 Solution: %d\n", maxOutput);
+    int sequence[] = {0, 1, 2, 3, 4};
+    int maxOutput = 0;
+    // check all permutations of sequence
+    do {
+        int result = runSequence (sequence, inputVals);
+        if (result > maxOutput) {
+            maxOutput = result;
+        }
+    } while (std::next_permutation (sequence, sequence + 5));
+
+    printf ("Part 1 Solution: %d\n", maxOutput);
 
     /* Part 2: -------------------------------------------------------------- */
 
-    int sequence2[] = {9, 8, 7, 6, 5};
+    int sequence2[] = {5, 6, 7, 8, 9};
     maxOutput = 0;
     // check all permutations of sequence
 
@@ -97,17 +97,16 @@ int main () {
     printf ("Part 2 Solution: %d\n", maxOutput);
 }
 
-long runSequence (int sequence[], std::vector<int> &inputFixed) {
+int runSequence (int sequence[], std::vector<int> &inputFixed) {
     std::vector<int> inputVals;
     // second input starts at 0 for the first iteration
-    long input2 = 0;
+    int input2 = 0;
     for (int i = 0; i < 5; i++) {
         // reset the memory input
         inputVals.assign (inputFixed.begin (), inputFixed.end ());
         // the result of processing the input will be used for next iteration
         input2 = processInput (inputVals, sequence[i], input2);
     }
-    printf("\n");
     // finished iterations, last result stored in input 2
     return input2;
 }
@@ -132,7 +131,6 @@ int runLoop (int sequence[], std::vector<int> &inputFixed) {
         // the result of processing the input will be used for next iteration
         input2 = processInputLoop (inputValsAll.at (i % 5), sequence[i % 5],
                                    input2, writeCounts[i % 5]);
-        printf("%d\n", input2);
         // check if amplifier step finished by checking for magic number
         if (inputValsAll.at (i % 5).back () == 99999) {
             numFinished ++;
@@ -143,10 +141,10 @@ int runLoop (int sequence[], std::vector<int> &inputFixed) {
     return input2;
 }
 
-long processInputLoop (std::vector<int> &inputVals, int input1, long input2,
+int processInputLoop (std::vector<int> &inputVals, int input1, int input2,
                       int &writeCount) {
     // pass by reference the flag tracking first input instruction and output
-    long output = -99999;
+    int output = -99999;
 
     int oldWriteCount = writeCount;
     // iterate through inputs individually; opcodes not at fixed positions
@@ -155,8 +153,7 @@ long processInputLoop (std::vector<int> &inputVals, int input1, long input2,
     bool waitFlag = false;
     while (index < inputVals.size ()) {
         // on very first run, use input1 given by signal
-        long input = writeCount == 0 ? input1 : input2;
-        printf ("Input: %d\n", input);
+        int input = writeCount == 0 ? input1 : input2;
 
         // check if input instruction ran
         if (writeCount > 1 && oldWriteCount != writeCount) {
@@ -170,7 +167,7 @@ long processInputLoop (std::vector<int> &inputVals, int input1, long input2,
         index += offset;
 
         // if reached write limit, break out of loop to get last output
-        if (offset == 0) {
+        if (offset == 0 && writeCount > 1) {
             break;
         }
 
@@ -185,11 +182,11 @@ long processInputLoop (std::vector<int> &inputVals, int input1, long input2,
 
 int processInput (std::vector<int> &inputVals, int input1, int input2) {
     // pass by reference the flag tracking first input instruction and output
-    long output = 0;
+    int output = 0;
 
     // iterate through inputs individually; opcodes not at fixed positions
     int i = 0;
-    long input = input1;
+    int input = input1;
     // unused variables for forward compatability with part 2
     int writeCount = 0;
     bool tempFlag = false;
@@ -224,8 +221,8 @@ void parseOpcode (int &opcode, int &mode1, int &mode2, int &mode3) {
     opcode = opcodeFinal;
 }
 
-int runOpcode (std::vector<int> &inputVals, int &index, long input,
-               int &writeCount, bool &waitFlag, long &output) {
+int runOpcode (std::vector<int> &inputVals, int &index, int input,
+               int &writeCount, bool &waitFlag, int &output) {
     // offset program counter, varies from how many inputs used for op
     int offset = 0;
     // get raw opcode from input
@@ -241,7 +238,7 @@ int runOpcode (std::vector<int> &inputVals, int &index, long input,
     }
     // must access final 3 values based on the utilized params for each case
     int val1, val2, val3;
-    printf("executing index: %d, opcode %d\n", index, opcode);
+//    printf("executing index: %d, opcode %d\n", index, opcode);
     switch (opcode) {
         // opcode 99: halt, return size to break out of caller loop
         case 99 :
@@ -264,7 +261,6 @@ int runOpcode (std::vector<int> &inputVals, int &index, long input,
             if (!waitFlag) {
                 // record the input write instruction
                 writeCount++;
-                printf( "writeCount: %d\n", writeCount);
                 inputVals.at (param[0]) = input;
                 offset = 2;
             }
