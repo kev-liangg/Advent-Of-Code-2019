@@ -16,8 +16,12 @@
 /*
  * process the inputs given by opcodes and entries within the input values
  * pass vector by reference for performance
+ *
+ * need to pass index and relativeBase as references to store outside of caller
+ * function in order to handle start/stop at each output
  */
-int processInput (std::vector<long> &inputVals, long input, int &index);
+int processInput (std::vector<long> &inputVals, long input, int &index,
+                  int &relativeBase);
 
 /*
  * parses the entire input opcode, passed through the first param
@@ -80,6 +84,8 @@ int main () {
     /* Part 2: -------------------------------------------------------------- */
 
     paintMap.clear();
+    inputVals.assign (inputOriginal.begin (), inputOriginal.end ());
+
     // color should have started on a single white square
     runPainter (paintMap, inputVals, 1);
     printf("Part 2 Solution: %d\n", paintMap.size ());
@@ -97,6 +103,7 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
     paintMap.insert ({currPos, startColor});
 
     int index = 0;
+    int base = 0;
     while (index < inputVals.size ()) {
         // get the color of the current position, default painted black
         int colorInput = 0;
@@ -108,7 +115,7 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
             colorInput = search->second;
 //            printf ("found color: %d\n", colorInput);
         }
-        int colorOutput = processInput (inputVals, colorInput, index);
+        int colorOutput = processInput (inputVals, colorInput, index, base);
         // location already in painted map, update color
         if (search != paintMap.end ()) {
             search->second = colorOutput;
@@ -119,7 +126,7 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
         }
 
         // get turn direction: 0 -> left, 1 -> right 90 degrees
-        int dir = processInput (inputVals, colorInput, index);
+        int dir = processInput (inputVals, colorInput, index, base);
         if (dir) {
             // increment turn index by one with wrap-around
             currDir = (currDir + 1) % 4;
@@ -133,9 +140,9 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
     }
 }
 
-int processInput (std::vector<long> &inputVals, long input, int &index) {
+int processInput (std::vector<long> &inputVals, long input, int &index,
+                  int &relativeBase) {
     // iterate through inputs individually; opcodes not at fixed positions
-    int relativeBase = 0;
     long output = -99999;
     // run up to next output
     while (index < inputVals.size ()) {
@@ -194,6 +201,7 @@ long getVal (std::vector<long> &inputVals, long param, int mode,
     else if (mode == 0 || mode == 2) {
         // calculate index to access, mode 0 absolute position
         int indexAccess = !mode ? param : param + relativeBase;
+        printf ("%d %d\n", param, relativeBase);
         return accessInput (inputVals, indexAccess);
     }
 
