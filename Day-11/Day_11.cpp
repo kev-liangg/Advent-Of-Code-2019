@@ -59,6 +59,8 @@ public:
 void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
                  std::vector<long> &inputVals, int startColor);
 
+void printPainter (std::unordered_map<coord, int, pairHash> &paintMap);
+
 int main () {
     std::ifstream inFile ("input.txt");
     // add each input value to vector for indexed read/write operations
@@ -88,7 +90,8 @@ int main () {
 
     // color should have started on a single white square
     runPainter (paintMap, inputVals, 1);
-    printf("Part 2 Solution: %d\n", paintMap.size ());
+    printf("Part 2 Solution:\n");
+    printPainter (paintMap);
 }
 
 void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
@@ -97,7 +100,7 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
     coord currPos ({0, 0});
     int currDir = 0;
     // represent movement with index: 0->up, 1->right, 2->down, 3->left
-    coord directions[] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    coord directions[] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
 
     // part 2: should have started at white square
     paintMap.insert ({currPos, startColor});
@@ -137,6 +140,46 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
         // move one step forward, using movement array representing dX/dY
         currPos.first += directions[currDir].first;
         currPos.second += directions[currDir].second;
+    }
+}
+
+void printPainter (std::unordered_map<coord, int, pairHash> &paintMap) {
+    // find top-left and bottom-right points to print
+    int minX = 99999;
+    int minY = 99999;
+    int maxX = -99999;
+    int maxY = -99999;
+    for (std::pair<coord, int> entry : paintMap) {
+        coord currPos = entry.first;
+        if (minX > currPos.first) {
+            minX = currPos.first;
+        }
+        if (minY > currPos.second) {
+            minY = currPos.second;
+        }
+        if (maxX < currPos.first) {
+            maxX = currPos.first;
+        }
+        if (maxY < currPos.second) {
+            maxY = currPos.second;
+        }
+    }
+
+    // starting at top-left point, print the map
+    for (int y = minY; y <= maxY; y++) {
+        for (int x = maxX; x >= minX; x--) {
+            std::unordered_map<coord, int, pairHash>::iterator search;
+            coord currPos = {x, y};
+            search = paintMap.find (currPos);
+            // point found, check if painted white
+            if (search != paintMap.end () && search->second == 1) {
+                std::cout << "#";
+            }
+            else {
+                std::cout << ".";
+            }
+        }
+        std::cout << "\n";
     }
 }
 
