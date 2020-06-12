@@ -76,7 +76,7 @@ int main () {
 
     // track painted coordinates: start at (0, 0), val 0->black, val 1->white
     std::unordered_map<coord, int, pairHash> paintMap;
-//    runPainter (paintMap, inputVals, 0);
+        runPainter (paintMap, inputVals, 0);
 
     // number of painted squares stored in paintMap
     printf("Part 1 Solution: %d\n", paintMap.size ());
@@ -113,7 +113,7 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
         if (search != paintMap.end ()) {
 
             colorInput = search->second;
-//            printf ("found color: %d\n", colorInput);
+            //            printf ("found color: %d\n", colorInput);
         }
         int colorOutput = processInput (inputVals, colorInput, index, base);
         // location already in painted map, update color
@@ -126,7 +126,7 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
         }
 
         // get turn direction: 0 -> left, 1 -> right 90 degrees
-        int dir = processInput (inputVals, colorInput, index, base);
+        int dir = processInput (inputVals, colorOutput, index, base);
         if (dir) {
             // increment turn index by one with wrap-around
             currDir = (currDir + 1) % 4;
@@ -201,7 +201,6 @@ long getVal (std::vector<long> &inputVals, long param, int mode,
     else if (mode == 0 || mode == 2) {
         // calculate index to access, mode 0 absolute position
         int indexAccess = !mode ? param : param + relativeBase;
-        printf ("%d %d\n", param, relativeBase);
         return accessInput (inputVals, indexAccess);
     }
 
@@ -213,7 +212,7 @@ long getVal (std::vector<long> &inputVals, long param, int mode,
 }
 
 // helper function to write the val at the index, which can be above bounds
-void writeVal (std::vector<long> &inputVals, int toWrite, int index) {
+void writeVal (std::vector<long> &inputVals, long toWrite, int index) {
     if (index >= inputVals.size ()) {
         inputVals.resize (index + 1);
     }
@@ -236,7 +235,7 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
     }
     // must access final 3 values based on the utilized params for each case
     long val1, val2;
-    printf ("running opcode %d at %d\n", opcode, index);
+//    printf ("running opcode %d at %d\n", opcode, index);
     switch (opcode) {
         // opcode 99: halt, return size to break out of caller loop
         case 99 :
@@ -250,8 +249,12 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             val2 = getVal (inputVals, param[1], mode2, relativeBase);
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // opcode 1: add vals; otherwise opcode 2: multiply final vals
-            writeVal (inputVals, (opcode == 1) ? val1 + val2 : val1 * val2,
-                      writeIndex);
+            if (opcode == 1) {
+                writeVal (inputVals, val1 + val2, writeIndex);
+            }
+            else {
+                writeVal (inputVals, val1 * val2, writeIndex);
+            }
             offset = 4;
             break;
         // part 1, opcode 3: write to position given by immediate param
@@ -264,7 +267,6 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
         // part 1, opcode 4: "output" from single param and mode
         case 4 :
             val1 = getVal (inputVals, param[0], mode1, relativeBase);
-            printf ("outputting %d\n", val1);
             output = val1;
             offset = 2;
             break;
@@ -335,3 +337,4 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
     // return program counter to determine next index of opcode for caller
     return offset;
 }
+
