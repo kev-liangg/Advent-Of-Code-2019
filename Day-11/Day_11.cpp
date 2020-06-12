@@ -73,15 +73,17 @@ int main () {
     // track painted coordinates: start at (0, 0), val 0->black, val1->white
     std::unordered_map<coord, int, pairHash> paintMap;
 
-
-
-    printf ("Part 1 Solution: See last nonzero output\n");
-
+    runPainter (paintMap, inputVals);
 }
 
 void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
                  std::vector<long> &inputVals) {
+    // current position at origin, facing up
     coord currPos ({0, 0});
+    int currDir = 0;
+    // represent movement with index: 0->up, 1->right, 2->down, 3->left
+    coord directions[] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
     paintMap.insert ({currPos, 0});
 
     int index = 0;
@@ -99,12 +101,22 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
         if (search != paintMap.end ()) {
             search->second = colorOutput;
         }
-        // otherwise need to add to map
+        // otherwise need to add location to map with painted color
         else {
-
+            paintMap.insert ({currPos, colorOutput});
         }
-        // change direction, update current position
+        // get turn direction: 0 -> left, 1 -> right 90 degrees
         int dir = processInput (inputVals, 1, index);
+        if (dir) {
+            // increment turn index by one with wrap-around
+            currDir = (currDir + 1) % 4;
+        }
+        else {
+            currDir = currDir ? currDir - 1 : 3;
+        }
+        // move one step forward, using movement array representing dX/dY
+        currPos.first += directions[currDir].first;
+        currPos.second += directions[currDir].second;
     }
 }
 
