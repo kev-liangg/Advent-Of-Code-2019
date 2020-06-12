@@ -53,7 +53,7 @@ public:
  * Run the painter robot from the input of opcode instructions
  */
 void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
-                 std::vector<long> &inputVals);
+                 std::vector<long> &inputVals, int startColor);
 
 int main () {
     std::ifstream inFile ("input.txt");
@@ -70,23 +70,31 @@ int main () {
 
     /* Part 1: -------------------------------------------------------------- */
 
-    // track painted coordinates: start at (0, 0), val 0->black, val1->white
+    // track painted coordinates: start at (0, 0), val 0->black, val 1->white
     std::unordered_map<coord, int, pairHash> paintMap;
-    runPainter (paintMap, inputVals);
+//    runPainter (paintMap, inputVals, 0);
 
     // number of painted squares stored in paintMap
     printf("Part 1 Solution: %d\n", paintMap.size ());
+
+    /* Part 2: -------------------------------------------------------------- */
+
+    paintMap.clear();
+    // color should have started on a single white square
+    runPainter (paintMap, inputVals, 1);
+    printf("Part 2 Solution: %d\n", paintMap.size ());
 }
 
 void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
-                 std::vector<long> &inputVals) {
+                 std::vector<long> &inputVals, int startColor) {
     // current position at origin, facing up
     coord currPos ({0, 0});
     int currDir = 0;
     // represent movement with index: 0->up, 1->right, 2->down, 3->left
     coord directions[] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
-    paintMap.insert ({currPos, 0});
+    // part 2: should have started at white square
+    paintMap.insert ({currPos, startColor});
 
     int index = 0;
     while (index < inputVals.size ()) {
@@ -96,7 +104,9 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
         search = paintMap.find (currPos);
         // location already painted, get color as input
         if (search != paintMap.end ()) {
+
             colorInput = search->second;
+//            printf ("found color: %d\n", colorInput);
         }
         int colorOutput = processInput (inputVals, colorInput, index);
         // location already in painted map, update color
@@ -107,8 +117,9 @@ void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
         else {
             paintMap.insert ({currPos, colorOutput});
         }
+
         // get turn direction: 0 -> left, 1 -> right 90 degrees
-        int dir = processInput (inputVals, 1, index);
+        int dir = processInput (inputVals, colorInput, index);
         if (dir) {
             // increment turn index by one with wrap-around
             currDir = (currDir + 1) % 4;
@@ -158,6 +169,7 @@ void parseOpcode (long &opcode, int &mode1, int &mode2, int &mode3) {
 long accessInput (std::vector<long> &inputVals, int index) {
     // bounds checking: index cannot be negative
     if (index < 0) {
+        printf ("accessing out of bounds %d\n", index);
         return -99999;
     }
     // higher than given input, resize and return 0
@@ -207,9 +219,8 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
         param[i] = inputVals.at (i + index + 1);
     }
     // must access final 3 values based on the utilized params for each case
-    long val1 = getVal (inputVals, param[0], mode1, relativeBase);
-    long val2 = getVal (inputVals, param[1], mode2, relativeBase);
-    long val3 = getVal (inputVals, param[2], mode3, relativeBase);
+    long val1, val2;
+    printf ("running opcode %d at %d\n", opcode, index);
     switch (opcode) {
         // opcode 99: halt, return size to break out of caller loop
         case 99 :
@@ -219,6 +230,8 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
         case 1 :
         case 2 :
             // determine write index if in relative mode
+            val1 = getVal (inputVals, param[0], mode1, relativeBase);
+            val2 = getVal (inputVals, param[1], mode2, relativeBase);
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // opcode 1: add vals; otherwise opcode 2: multiply final vals
             inputVals.at (writeIndex) = (opcode == 1) ? val1 + val2 : val1 * val2;
@@ -233,11 +246,15 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             break;
         // part 1, opcode 4: "output" from single param and mode
         case 4 :
+            val1 = getVal (inputVals, param[0], mode1, relativeBase);
+            printf ("outputting %d\n", val1);
             output = val1;
             offset = 2;
             break;
         // part 2, opcode 5: if first param nonzero, set pc using second param
         case 5 :
+            val1 = getVal (inputVals, param[0], mode1, relativeBase);
+            val2 = getVal (inputVals, param[1], mode2, relativeBase);
             // check final value of first param, update pc accordingly
             if (val1 != 0) {
                 index = val2;
@@ -248,6 +265,8 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             break;
         // part 2, opcode 6: if first param zero, set pc using second param
         case 6 :
+            val1 = getVal (inputVals, param[0], mode1, relativeBase);
+            val2 = getVal (inputVals, param[1], mode2, relativeBase);
             // check final value of first param, update pc accordingly
             if (val1 == 0) {
                 index = val2;
@@ -258,6 +277,8 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             break;
         // part 2, opcode 7: if first param < second param, 1 in third param
         case 7 :
+            val1 = getVal (inputVals, param[0], mode1, relativeBase);
+            val2 = getVal (inputVals, param[1], mode2, relativeBase);
             // determine write index if in relative mode
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // compare final values of first and second params
@@ -271,6 +292,8 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             break;
         // part 2, opcode 8: if first param == second param, 1 in third param
         case 8 :
+            val1 = getVal (inputVals, param[0], mode1, relativeBase);
+            val2 = getVal (inputVals, param[1], mode2, relativeBase);
             // determine write index if in relative mode
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // compare final values of first and second params
@@ -284,6 +307,7 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             break;
         // Day 9: adjusts the relative base from value of only parameter
         case 9 :
+            val1 = getVal (inputVals, param[0], mode1, relativeBase);
             relativeBase += val1;
             offset = 2;
             break;
