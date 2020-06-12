@@ -181,7 +181,7 @@ long accessInput (std::vector<long> &inputVals, int index) {
     }
     // higher than given input, resize and return 0
     else if (index >= inputVals.size ()) {
-        inputVals.resize (index);
+        inputVals.resize (index + 1);
         return 0;
     }
     // within bounds
@@ -215,7 +215,7 @@ long getVal (std::vector<long> &inputVals, long param, int mode,
 // helper function to write the val at the index, which can be above bounds
 void writeVal (std::vector<long> &inputVals, int toWrite, int index) {
     if (index >= inputVals.size ()) {
-            inputVals.resize (index);
+        inputVals.resize (index + 1);
     }
     inputVals.at (index) = toWrite;
 }
@@ -250,8 +250,8 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             val2 = getVal (inputVals, param[1], mode2, relativeBase);
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // opcode 1: add vals; otherwise opcode 2: multiply final vals
-            int toWrite = (opcode == 1) ? val1 + val2 : val1 * val2;
-            writeVal (inputVals, toWrite, writeIndex);
+            writeVal (inputVals, (opcode == 1) ? val1 + val2 : val1 * val2,
+                      writeIndex);
             offset = 4;
             break;
         // part 1, opcode 3: write to position given by immediate param
