@@ -212,6 +212,14 @@ long getVal (std::vector<long> &inputVals, long param, int mode,
     }
 }
 
+// helper function to write the val at the index, which can be above bounds
+void writeVal (std::vector<long> &inputVals, int toWrite, int index) {
+    if (index >= inputVals.size ()) {
+            inputVals.resize (index);
+    }
+    inputVals.at (index) = toWrite;
+}
+
 int runOpcode (std::vector<long> &inputVals, int &index, long input,
                long &output, int &relativeBase) {
     // offset program counter, varies from how many inputs used for op
@@ -242,14 +250,15 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             val2 = getVal (inputVals, param[1], mode2, relativeBase);
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // opcode 1: add vals; otherwise opcode 2: multiply final vals
-            inputVals.at (writeIndex) = (opcode == 1) ? val1 + val2 : val1 * val2;
+            int toWrite = (opcode == 1) ? val1 + val2 : val1 * val2;
+            writeVal (inputVals, toWrite, writeIndex);
             offset = 4;
             break;
         // part 1, opcode 3: write to position given by immediate param
         case 3 :
             // determine write index if in relative mode
             writeIndex = mode1 == 2 ? param[0] + relativeBase : param[0];
-            inputVals.at (writeIndex) = input;
+            writeVal (inputVals, input, writeIndex) ;
             offset = 2;
             break;
         // part 1, opcode 4: "output" from single param and mode
@@ -291,10 +300,10 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // compare final values of first and second params
             if (val1 < val2) {
-                inputVals.at (writeIndex) = 1;
+                writeVal (inputVals, 1, writeIndex);
             }
             else {
-                inputVals.at (writeIndex) = 0;
+                writeVal (inputVals, 0, writeIndex);
             }
             offset = 4;
             break;
@@ -306,10 +315,10 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             writeIndex = mode3 == 2 ? param[2] + relativeBase : param[2];
             // compare final values of first and second params
             if (val1 == val2) {
-                inputVals.at (writeIndex) = 1;
+                writeVal (inputVals, 1, writeIndex);
             }
             else {
-                inputVals.at (writeIndex) = 0;
+                writeVal (inputVals, 0, writeIndex);
             }
             offset = 4;
             break;
