@@ -72,8 +72,10 @@ int main () {
 
     // track painted coordinates: start at (0, 0), val 0->black, val1->white
     std::unordered_map<coord, int, pairHash> paintMap;
-
     runPainter (paintMap, inputVals);
+
+    // number of painted squares stored in paintMap
+    printf("Part 1 Solution: %d\n", paintMap.size ());
 }
 
 void runPainter (std::unordered_map<coord, int, pairHash> &paintMap,
