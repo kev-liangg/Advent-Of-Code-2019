@@ -6,6 +6,8 @@
 #include <cmath>
 #include <vector>
 #include <fstream>
+#include <iostream>
+#include <numeric>
 
 struct Moon {
     // position: x, y, z
@@ -37,6 +39,11 @@ void step (std::vector<Moon> &moons, int numSteps);
  */
 int calcEnergy (Moon base);
 
+/*
+ * Part 2: check equality between two moon positions to identify repeat
+ */
+bool compare (Moon m1, Moon m2, int indexField);
+
 int main () {
     // input not consistently formatted for starting points, enter manually
     //         x    y    z    velocity starts 0
@@ -61,6 +68,40 @@ int main () {
         total += calcEnergy (moon);
     }
     printf ("Part 1 Solution: %d\n", total);
+
+    /* Part 2: -------------------------------------------------------------- */
+
+    moons.clear ();
+    moons.push_back (m1);
+    moons.push_back (m2);
+    moons.push_back (m3);
+    moons.push_back (m4);
+
+    // calculate number of steps for each position to repeat: x, y, and z
+    // step one at a time, and monitor for repeats on x, y, and z
+
+    int cycles[] = {0, 0, 0};
+    int numSteps = 0;
+    // finished when all cycle lengths assigned a value
+    while (!(cycles[0] && cycles[1] && cycles[2])) {
+        step (moons, 1);
+        numSteps++;
+        // check x, y, and z fields for repeat
+        for (int i = 0; i < 3; i++) {
+            // compare all the moons to their starting positions
+            if (compare (moons.at (0), m1, i) &&
+                compare (moons.at (1), m2, i) &&
+                compare (moons.at (2), m3, i) &&
+                compare (moons.at (3), m4, i) &&
+                !cycles[i]) {
+                // record the cycle for corresponding field
+                cycles[i] = numSteps;
+            }
+        }
+    }
+
+    printf ("Part 2 Solution: LCM of %d, %d, %d\n",
+            cycles[0], cycles[1], cycles[2]);
 }
 
 void step (std::vector<Moon> &moons, int numSteps) {
@@ -113,4 +154,14 @@ int calcEnergy (Moon base) {
         totalVel += std::abs (base.vel[i]);
     }
     return totalPos * totalVel;
+}
+
+bool compare (Moon m1, Moon m2, int indexField) {
+    if (m1.pos[indexField] != m2.pos[indexField]) {
+        return false;
+    }
+    if (m1.vel[indexField] != m2.vel[indexField]) {
+        return false;
+    }
+    return true;
 }
