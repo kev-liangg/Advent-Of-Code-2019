@@ -14,6 +14,8 @@
  *
  * need to pass index and relativeBase as references to store outside of caller
  * function in order to handle start/stop at each output
+ *
+ * Part 2 cheating: if flag set to cheat, then in
  */
 int processInput (std::vector<long> &inputVals, long input, int &index,
                   int &relativeBase);
@@ -56,6 +58,14 @@ void setupTiles (std::unordered_map<coord, int, pairHash> &tileMap,
 
 void printTiles (std::unordered_map<coord, int, pairHash> &tileMap);
 
+/*
+ * Beat the game by breaking all the blocks and determine the final score.
+ *
+ * Precondition: Cheat by modifying the input to put the paddle over the entire
+ * screen!
+ */
+int winGame (std::vector<long> &inputVals);
+
 int main () {
     std::ifstream inFile ("input.txt");
     // add each input value to vector for indexed read/write operations
@@ -65,9 +75,6 @@ int main () {
     while (std::getline (inFile, val, ',')) {
         inputVals.push_back (std::stol (val));
     }
-    // obtain deep copy of this original vector
-    std::vector<long> inputOriginal;
-    inputOriginal.assign (inputVals.begin (), inputVals.end ());
 
     /* Part 1: -------------------------------------------------------------- */
 
@@ -83,14 +90,40 @@ int main () {
         }
     }
     // number of painted squares stored in paintMap
-    printf("Part 1 Solution: %d\n", numBlocks);
+    printf ("Part 1 Solution: %d\n", numBlocks);
 
     /* Part 2: -------------------------------------------------------------- */
 
-    // initialize game by setting memory address 0 to 2
-    inputVals.at (0) = 2;
-    printTiles (tileMap);
+    // use cheated input! this is why obfuscating machine code is important.
+    std::ifstream cheatFile ("inputCheat.txt");
+    std::vector<long> inputCheat;
+    while (std::getline (cheatFile, val, ',')) {
+        inputCheat.push_back (std::stol (val));
+    }
+    tileMap.clear ();
 
+    // now win the game.
+    inputCheat.at (0) = 2;
+    int finalScore = winGame (inputCheat);
+    printf ("Part 2 Solution: %d\n", finalScore);
+
+}
+
+int winGame (std::vector<long> &inputVals) {
+    // run game normally: every 3 outputs: x, y, then tile type
+    int index = 0;
+    int relativeBase = 0;
+    int lastScore = 0;
+    while (index < inputVals.size ()) {
+        int x = processInput (inputVals, 0, index, relativeBase);
+        int y = processInput (inputVals, 0, index, relativeBase);
+        int type = processInput (inputVals, 0, index, relativeBase);
+        // check for score update
+        if (x == -1 && !y) {
+            lastScore = type;
+        }
+    }
+    return lastScore;
 }
 
 void setupTiles (std::unordered_map<coord, int, pairHash> &tileMap,
@@ -158,9 +191,6 @@ void printTiles (std::unordered_map<coord, int, pairHash> &tileMap) {
                 else {
                     std::cout << ".";
                 }
-            }
-            else {
-                std::cout << ".";
             }
         }
         std::cout << "\n";
