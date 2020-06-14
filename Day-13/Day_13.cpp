@@ -54,7 +54,7 @@ public:
 void setupTiles (std::unordered_map<coord, int, pairHash> &tileMap,
                  std::vector<long> &inputVals);
 
-void printTiles (std::unordered_map<coord, int, pairHash> &paintMap);
+void printTiles (std::unordered_map<coord, int, pairHash> &tileMap);
 
 int main () {
     std::ifstream inFile ("input.txt");
@@ -86,6 +86,11 @@ int main () {
     printf("Part 1 Solution: %d\n", numBlocks);
 
     /* Part 2: -------------------------------------------------------------- */
+
+    // initialize game by setting memory address 0 to 2
+    inputVals.at (0) = 2;
+    printTiles (tileMap);
+
 }
 
 void setupTiles (std::unordered_map<coord, int, pairHash> &tileMap,
@@ -97,19 +102,20 @@ void setupTiles (std::unordered_map<coord, int, pairHash> &tileMap,
         int x = processInput (inputVals, 0, index, relativeBase);
         int y = processInput (inputVals, 0, index, relativeBase);
         int type = processInput (inputVals, 0, index, relativeBase);
-
-        tileMap.insert ({{x, y}, type});
+        // catch output exception when reading halt opcode
+        if (x != -99999) {
+            tileMap.insert ({{x, y}, type});
+        }
     }
-
 }
 
-void printTiles (std::unordered_map<coord, int, pairHash> &paintMap) {
+void printTiles (std::unordered_map<coord, int, pairHash> &tileMap) {
     // find top-left and bottom-right points to print
     int minX = 99999;
     int minY = 99999;
     int maxX = -99999;
     int maxY = -99999;
-    for (std::pair<coord, int> entry : paintMap) {
+    for (std::pair<coord, int> entry : tileMap) {
         coord currPos = entry.first;
         if (minX > currPos.first) {
             minX = currPos.first;
@@ -130,10 +136,28 @@ void printTiles (std::unordered_map<coord, int, pairHash> &paintMap) {
         for (int x = maxX; x >= minX; x--) {
             std::unordered_map<coord, int, pairHash>::iterator search;
             coord currPos = {x, y};
-            search = paintMap.find (currPos);
-            // point found, check if painted white
-            if (search != paintMap.end () && search->second == 1) {
-                std::cout << "#";
+            search = tileMap.find (currPos);
+            if (search != tileMap.end ()) {
+                // wall tile
+                if (search->second == 1) {
+                    std::cout << "#";
+                }
+                // block tile
+                else if (search->second == 2) {
+                    std::cout << "B";
+                }
+                // horizontal paddle tile
+                else if (search->second == 3) {
+                    std::cout << "T";
+                }
+                // ball tile
+                else if (search->second == 4) {
+                    std::cout << "O";
+                }
+                // empty tile
+                else {
+                    std::cout << ".";
+                }
             }
             else {
                 std::cout << ".";
