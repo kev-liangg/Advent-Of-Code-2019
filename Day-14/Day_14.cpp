@@ -31,7 +31,7 @@ int calcOres (MatInfo &mats, ReqCount &currReqs,
               ReqCount &excesses);
 
 int main () {
-    std::ifstream fileIn ("inputSmall.txt");
+    std::ifstream fileIn ("input.txt");
     std::string line;
     MatInfo mats;
 
@@ -68,47 +68,50 @@ int calcOres (MatInfo &mats, ReqCount &currReqs,
         ReqCount::iterator curr = currReqs.begin();
         std::string name = curr->first;
         int numRequired = curr->second;
-        std::cout << name << " " << numRequired << "\n";
 
         // update required with excess
         ReqCount::iterator searchCount = excesses.find (name);
-        numRequired -= searchCount->second;
-        std::cout << "excess: " << searchCount->second << std::endl;
-        searchCount->second = 0;
-
-        // get total materials needed to produce current requirement
-        MatInfo::iterator searchReqs = mats.find (name);
-        std::vector<req> reqs = searchReqs->second;
-        // determine total number material output required, scale factor
-        int output = reqs.back ().second;
-        reqs.pop_back ();
-
-        // check if excess generated while calculating scale factor
-        int scale = numRequired / output;
-        int excess = 0;
-        if (numRequired % output) {
-            scale += 1;
-            excess = output * scale - numRequired;
+        int& currExcess = searchCount->second;
+        if (currExcess >= numRequired) {
+            currExcess -= numRequired;
+            currReqs.erase (name);
         }
+        else {
+            numRequired -= currExcess;
+            currExcess = 0;
+            // get total materials needed to produce current requirement
+            MatInfo::iterator searchReqs = mats.find (name);
+            std::vector<req> reqs = searchReqs->second;
+            // determine total number material output required, scale factor
+            int output = reqs.back ().second;
+            reqs.pop_back ();
 
-        // remove current requirement and update excess
-        currReqs.erase (name);
-        searchCount->second = searchCount->second + excess;
-
-        for (req r : reqs) {
-            std::cout << r.first << "\n";
-            // base case: check for ore requirement
-            if (r.first == "ORE") {
-                ore += scale * r.second;
+            // check if excess generated while calculating scale factor
+            int scale = numRequired / output;
+            int excess = 0;
+            if (numRequired % output) {
+                scale += 1;
+                excess = output * scale - numRequired;
             }
-            // otherwise add to map of current requirements
-            else {
-                searchCount = currReqs.find (r.first);
-                if (searchCount == currReqs.end ()) {
-                    currReqs.insert ({r.first, scale * r.second});
+
+            // remove current requirement and update excess
+            currReqs.erase (name);
+            searchCount->second = searchCount->second + excess;
+
+            for (req r : reqs) {
+                // base case: check for ore requirement
+                if (r.first == "ORE") {
+                    ore += scale * r.second;
                 }
+                // otherwise add to map of current requirements
                 else {
-                    searchCount->second += scale * r.second;
+                    searchCount = currReqs.find (r.first);
+                    if (searchCount == currReqs.end ()) {
+                        currReqs.insert ({r.first, scale * r.second});
+                    }
+                    else {
+                        searchCount->second += scale * r.second;
+                    }
                 }
             }
         }
