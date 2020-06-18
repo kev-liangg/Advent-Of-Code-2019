@@ -31,7 +31,7 @@ int calcOres (MatInfo &mats, ReqCount &currReqs,
               ReqCount &excesses);
 
 int main () {
-    std::ifstream fileIn ("input.txt");
+    std::ifstream fileIn ("inputSmall.txt");
     std::string line;
     MatInfo mats;
 
@@ -73,6 +73,7 @@ int calcOres (MatInfo &mats, ReqCount &currReqs,
         // update required with excess
         ReqCount::iterator searchCount = excesses.find (name);
         numRequired -= searchCount->second;
+        std::cout << "excess: " << searchCount->second << std::endl;
         searchCount->second = 0;
 
         // get total materials needed to produce current requirement
@@ -87,13 +88,11 @@ int calcOres (MatInfo &mats, ReqCount &currReqs,
         int excess = 0;
         if (numRequired % output) {
             scale += 1;
-            excess = numRequired - output * scale;
+            excess = output * scale - numRequired;
         }
 
         // remove current requirement and update excess
-        std::cout << currReqs.size();
         currReqs.erase (name);
-        std::cout << " " << currReqs.size() << "\n";
         searchCount->second = searchCount->second + excess;
 
         for (req r : reqs) {
