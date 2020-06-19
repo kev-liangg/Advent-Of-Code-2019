@@ -27,13 +27,13 @@ typedef std::unordered_map<std::string, int> ReqCount;
 
 void processLine (std::string &in, std::vector<req> &reqs);
 
-int calcOres (MatInfo &mats, ReqCount &currReqs,
-              ReqCount &excesses);
+long calcOres (MatInfo &mats, ReqCount &currReqs,
+               ReqCount &excesses);
 
 /*
  * Part 2: Calculate the number of ores required for certain amount of fuel
  */
-int calcOresFuel (int numFuel, MatInfo &mats, ReqCount excesses);
+long calcOresFuel (long numFuel, MatInfo &mats, ReqCount excesses);
 
 int main () {
     std::ifstream fileIn ("input.txt");
@@ -71,12 +71,14 @@ int main () {
         pair.second = 0;
     }
 
-    std::cout << calcOresFuel (1, mats, excesses) << std::endl;
-    std::cout << calcOresFuel (2, mats, excesses) << std::endl;
-    std::cout << calcOresFuel (1, mats, excesses) << std::endl;
+    // lower bound: at most 1 trillion divided by previous requirement
+    long ores = 1e12;
+    long start = ores / totalOres;
+    long result = calcOresFuel (start, mats, excesses);
+    std::cout << ores - result;
 }
 
-int calcOresFuel (int numFuel, MatInfo &mats, ReqCount excesses) {
+long calcOresFuel (long numFuel, MatInfo &mats, ReqCount excesses) {
     // set up requirements for specified number of fuel
     MatInfo::iterator search = mats.find ("FUEL");
     std::vector<req> fuelReqs = search->second;
@@ -88,10 +90,10 @@ int calcOresFuel (int numFuel, MatInfo &mats, ReqCount excesses) {
     return calcOres (mats, currReqs, excesses);
 }
 
-int calcOres (MatInfo &mats, ReqCount &currReqs,
-              ReqCount &excesses) {
+long calcOres (MatInfo &mats, ReqCount &currReqs,
+               ReqCount &excesses) {
     // iterative solution
-    int ore = 0;
+    long ore = 0;
     while (currReqs.size ()) {
         ReqCount::iterator curr = currReqs.begin();
         std::string name = curr->first;
