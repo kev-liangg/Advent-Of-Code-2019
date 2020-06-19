@@ -13,7 +13,7 @@
 /*
  * the name of the requirement and number required
  */
-typedef std::pair<std::string, int> req;
+typedef std::pair<std::string, long> req;
 
 /*
  * hash mapping of each material and its total requirements
@@ -23,7 +23,7 @@ typedef std::unordered_map<std::string, std::vector<req>> MatInfo;
 /*
  * hash mapping of a material requirement to an individual count
  */
-typedef std::unordered_map<std::string, int> ReqCount;
+typedef std::unordered_map<std::string, long> ReqCount;
 
 void processLine (std::string &in, std::vector<req> &reqs);
 
@@ -67,15 +67,23 @@ int main () {
     /* Part 2: -------------------------------------------------------------- */
 
     // reset excesses, before passing-by-copy
-    for (std::pair<const std::string, int> &pair : excesses) {
+    for (std::pair<const std::string, long> &pair : excesses) {
         pair.second = 0;
     }
 
     // lower bound: at most 1 trillion divided by previous requirement
     long ores = 1e12;
-    long start = ores / totalOres;
-    long result = calcOresFuel (start, mats, excesses);
-    std::cout << ores - result;
+    long fuel = ores / totalOres;
+    long result = calcOresFuel (fuel, mats, excesses);
+    // slow brute force: increment number of fuel required until over 1e12
+    while (result < 1e12) {
+        fuel++;
+        result = calcOresFuel (fuel, mats, excesses);
+        std::cout << result << std::endl;
+    }
+
+    // overshot, last value of fuel was max able to be produced
+    std::cout << "Part 2 Solution: " << fuel - 1 << std::endl;
 }
 
 long calcOresFuel (long numFuel, MatInfo &mats, ReqCount excesses) {
@@ -101,7 +109,7 @@ long calcOres (MatInfo &mats, ReqCount &currReqs,
 
         // update required with excess
         ReqCount::iterator searchCount = excesses.find (name);
-        int& currExcess = searchCount->second;
+        long& currExcess = searchCount->second;
         if (currExcess >= numRequired) {
             currExcess -= numRequired;
             currReqs.erase (name);
@@ -113,12 +121,12 @@ long calcOres (MatInfo &mats, ReqCount &currReqs,
             MatInfo::iterator searchReqs = mats.find (name);
             std::vector<req> reqs = searchReqs->second;
             // determine total number material output required, scale factor
-            int output = reqs.back ().second;
+            long output = reqs.back ().second;
             reqs.pop_back ();
 
             // check if excess generated while calculating scale factor
-            int scale = numRequired / output;
-            int excess = 0;
+            long scale = numRequired / output;
+            long excess = 0;
             if (numRequired % output) {
                 scale += 1;
                 excess = output * scale - numRequired;
