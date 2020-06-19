@@ -73,17 +73,33 @@ int main () {
 
     // lower bound: at most 1 trillion divided by previous requirement
     long ores = 1e12;
-    long fuel = ores / totalOres;
-    long result = calcOresFuel (fuel, mats, excesses);
-    // slow brute force: increment number of fuel required until over 1e12
+    long low = ores / totalOres;
+    long high = low;
+    long result = calcOresFuel (low, mats, excesses);
+    // brute force: increment number of fuel required until over 1e12
     while (result < 1e12) {
-        fuel++;
-        result = calcOresFuel (fuel, mats, excesses);
-        std::cout << result << std::endl;
+        high *= 10;
+        result = calcOresFuel (high, mats, excesses);
+    }
+
+    // binary search
+    long mid;
+    while (low < high - 1) {
+        mid = (high + low) / 2;
+        result = calcOresFuel (mid, mats, excesses);
+        if (result > 1e12) {
+            high = mid;
+        }
+        else if (result < 1e12) {
+            low = mid;
+        }
+        else {
+            break;
+        }
     }
 
     // overshot, last value of fuel was max able to be produced
-    std::cout << "Part 2 Solution: " << fuel - 1 << std::endl;
+    std::cout << "Part 2 Solution: " << mid << std::endl;
 }
 
 long calcOresFuel (long numFuel, MatInfo &mats, ReqCount excesses) {
@@ -105,7 +121,7 @@ long calcOres (MatInfo &mats, ReqCount &currReqs,
     while (currReqs.size ()) {
         ReqCount::iterator curr = currReqs.begin();
         std::string name = curr->first;
-        int numRequired = curr->second;
+        long numRequired = curr->second;
 
         // update required with excess
         ReqCount::iterator searchCount = excesses.find (name);
