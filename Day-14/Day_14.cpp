@@ -30,6 +30,11 @@ void processLine (std::string &in, std::vector<req> &reqs);
 int calcOres (MatInfo &mats, ReqCount &currReqs,
               ReqCount &excesses);
 
+/*
+ * Part 2: Calculate the number of ores required for certain amount of fuel
+ */
+int calcOresFuel (int numFuel, MatInfo &mats, ReqCount excesses);
+
 int main () {
     std::ifstream fileIn ("input.txt");
     std::string line;
@@ -55,9 +60,32 @@ int main () {
     for (req r : fuelReqs) {
         currReqs.insert ({r.first, r.second});
     }
-    // run calculation function
+
     int totalOres = calcOres (mats, currReqs, excesses);
     std::cout << "Part 1 Solution: " << totalOres << std::endl;
+
+    /* Part 2: -------------------------------------------------------------- */
+
+    // reset excesses, before passing-by-copy
+    for (std::pair<const std::string, int> &pair : excesses) {
+        pair.second = 0;
+    }
+
+    std::cout << calcOresFuel (1, mats, excesses) << std::endl;
+    std::cout << calcOresFuel (2, mats, excesses) << std::endl;
+    std::cout << calcOresFuel (1, mats, excesses) << std::endl;
+}
+
+int calcOresFuel (int numFuel, MatInfo &mats, ReqCount excesses) {
+    // set up requirements for specified number of fuel
+    MatInfo::iterator search = mats.find ("FUEL");
+    std::vector<req> fuelReqs = search->second;
+    fuelReqs.pop_back ();
+    ReqCount currReqs;
+    for (req r : fuelReqs) {
+        currReqs.insert ({r.first, r.second * numFuel});
+    }
+    return calcOres (mats, currReqs, excesses);
 }
 
 int calcOres (MatInfo &mats, ReqCount &currReqs,
