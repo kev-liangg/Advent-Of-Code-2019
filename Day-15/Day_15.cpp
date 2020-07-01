@@ -11,7 +11,7 @@
  * process the inputs given by opcodes and entries within the input values
  * pass vector by reference for performance
  */
-void processInput (std::vector<long> &inputVals, long input);
+long processInput (std::vector<long> &inputVals, long input);
 
 /*
  * parses the entire input opcode, passed through the first param
@@ -45,7 +45,7 @@ int main () {
     /* Part 1: -------------------------------------------------------------- */
 }
 
-void processInput (std::vector<long> &inputVals, long input) {
+long processInput (std::vector<long> &inputVals, long input) {
     // iterate through inputs individually; opcodes not at fixed positions
     int i = 0;
     int relativeBase = 0;
@@ -54,6 +54,9 @@ void processInput (std::vector<long> &inputVals, long input) {
         // execute the opcode with helper function
 //        printf("running opcode with index %d\n", i);
         int offset = runOpcode (inputVals, i, input, output, relativeBase);
+        if (output != -99999) {
+            return output;
+        }
         i += offset;
     }
 }
