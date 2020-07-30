@@ -43,20 +43,6 @@ int main () {
     inputOriginal.assign (inputVals.begin (), inputVals.end ());
 
     /* Part 1: -------------------------------------------------------------- */
-
-    // initial conditions: input = 1
-    processInput (inputVals, 1);
-
-    printf ("Part 1 Solution: See last nonzero output\n");
-
-    /* Part 2: -------------------------------------------------------------- */
-
-    inputVals.assign (inputOriginal.begin (), inputOriginal.end ());
-
-    // initial conditions: input = 2
-    processInput (inputVals, 2);
-
-    printf ("Part 2 Solution: See last nonzero output\n");
 }
 
 void processInput (std::vector<long> &inputVals, long input) {
