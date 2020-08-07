@@ -29,6 +29,11 @@ void parseOpcode (long &opcode, int &mode1, int &mode2, int &mode3);
 int runOpcode (std::vector<long> &inputVals, int &index, long input,
                long &output, int &relativeBase);
 
+/*
+ * recursive backtracking solution to determine minimum steps to maze target
+ */
+bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir);
+
 int main () {
     std::ifstream inFile ("input.txt");
     // add each input value to vector for indexed read/write operations
@@ -43,6 +48,51 @@ int main () {
     inputOriginal.assign (inputVals.begin (), inputVals.end ());
 
     /* Part 1: -------------------------------------------------------------- */
+    int currSteps = 1;
+    runMaze(inputVals, currSteps, -1);
+    std::cout << "Part 1 Solution: " << currSteps << std::endl;
+}
+
+bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir) {
+	// try inputs 1, 2, 3, 4 (N, S, W, E)
+	long output;
+	for (long i = 1; i <= 3; i += 2) {
+		if (i != lastDir) {
+			std::vector<long> oldInput = inputVals;
+			output = processInput (inputVals, i);
+//			std::cout << i << " " << output << " " << currSteps << "\n";
+			if (output == 1) {	// last direction given by i + 1
+				if (runMaze (inputVals, ++currSteps, i + 1)) {
+					return true;
+				}
+				--currSteps;	// didn't reach target, undo steps
+				inputVals = oldInput;
+			}
+			else if (output == 2) {	// reached target location
+				return true;
+			}
+		}
+	}
+
+	for (long i = 2; i <= 4; i += 2) {
+		if (i != lastDir) {
+			std::vector<long> oldInput = inputVals;
+			output = processInput (inputVals, i);
+//			std::cout << i << " " << output << " " << currSteps << "\n";
+			if (output == 1) {	// last direction given by i - 1
+				if (runMaze (inputVals, ++currSteps, i - 1)) {
+					return true;
+				}
+				--currSteps;	// didn't reach target, undo steps
+				inputVals = oldInput;
+			}
+			else if (output == 2) {	// reached target location
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 long processInput (std::vector<long> &inputVals, long input) {
@@ -59,6 +109,7 @@ long processInput (std::vector<long> &inputVals, long input) {
         }
         i += offset;
     }
+    return output;	// -99999
 }
 
 void parseOpcode (long &opcode, int &mode1, int &mode2, int &mode3) {
@@ -155,7 +206,8 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
             break;
         // part 1, opcode 4: "output" from single param and mode
         case 4 :
-            std::cout << "output: " << val1 << "\n";
+//            std::cout << "output: " << val1 << "\n";
+        	output = val1;
             offset = 2;
             break;
         // part 2, opcode 5: if first param nonzero, set pc using second param
