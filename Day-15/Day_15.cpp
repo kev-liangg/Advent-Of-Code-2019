@@ -34,6 +34,12 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
  */
 bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir);
 
+/*
+ * recursive backtracking solution without early return to generate a
+ * representation of the maze to support full Dijkstra calculations
+ */
+bool generateMaze (std::vector<long> inputVals, int& currSteps, long lastDir);
+
 int main () {
     std::ifstream inFile ("input.txt");
     // add each input value to vector for indexed read/write operations
