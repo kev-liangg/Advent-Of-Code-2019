@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <deque>
 
 /*
  * process the inputs given by opcodes and entries within the input values
@@ -35,10 +36,10 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
 bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir);
 
 /*
- * recursive backtracking solution without early return to generate a
- * representation of the maze to support full Dijkstra calculations
+ * breadth first search to determine maximum depth; call after runMaze to start
+ * at target location
  */
-bool generateMaze (std::vector<long> inputVals, int& currSteps, long lastDir);
+int runDepth (std::vector<long> inputVals, long lastDir);
 
 int main () {
     std::ifstream inFile ("input.txt");
@@ -99,6 +100,11 @@ bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir) {
 	}
 
 	return false;
+}
+
+int runDepth (std::vector<long> inputVals, long lastDir) {
+	std::deque<std::vector<long>> queue;
+	return 0;
 }
 
 long processInput (std::vector<long> &inputVals, long input) {
