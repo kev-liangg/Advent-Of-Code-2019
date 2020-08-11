@@ -33,13 +33,13 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
 /*
  * recursive backtracking solution to determine minimum steps to maze target
  */
-bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir);
+bool runMaze (std::vector<long> &inputVals, int& currSteps, long lastDir);
 
 /*
  * breadth first search to determine maximum depth; call after runMaze to start
  * at target location
  */
-int runDepth (std::vector<long> inputVals, long lastDir);
+int runDepth (std::vector<long> inputVals);
 
 int main () {
     std::ifstream inFile ("input.txt");
@@ -60,7 +60,7 @@ int main () {
     std::cout << "Part 1 Solution: " << currSteps << std::endl;
 }
 
-bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir) {
+bool runMaze (std::vector<long> &inputVals, int& currSteps, long lastDir) {
 	// try inputs 1, 2, 3, 4 (N, S, W, E)
 	long output;
 	for (long i = 1; i <= 3; i += 2) {
@@ -102,8 +102,21 @@ bool runMaze (std::vector<long> inputVals, int& currSteps, long lastDir) {
 	return false;
 }
 
-int runDepth (std::vector<long> inputVals, long lastDir) {
+/*
+ * Node struct to track visited positions during iterative BFS relative to
+ * the starting point
+ */
+struct Node {
+	int x;
+	int y;
+};
+
+int runDepth (std::vector<long> inputVals) {
 	std::deque<std::vector<long>> queue;
+	queue.push_back(inputVals);
+	while (queue.size()) {
+
+	}
 	return 0;
 }
 
