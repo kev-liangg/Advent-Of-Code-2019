@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include <deque>
+#include <unordered_map>
 
 /*
  * process the inputs given by opcodes and entries within the input values
@@ -33,7 +34,7 @@ int runOpcode (std::vector<long> &inputVals, int &index, long input,
 /*
  * recursive backtracking solution to determine minimum steps to maze target
  */
-bool runMaze (std::vector<long> &inputVals, int& currSteps, long lastDir);
+bool runMaze (std::vector<long> &inputVals, int& currSteps, int lastDir);
 
 /*
  * breadth first search to determine maximum depth; call after runMaze to start
@@ -58,12 +59,14 @@ int main () {
     int currSteps = 1;
     runMaze(inputVals, currSteps, -1);
     std::cout << "Part 1 Solution: " << currSteps << std::endl;
+
+    /* Part 2: -------------------------------------------------------------- */
+    runDepth(inputVals);
 }
 
-bool runMaze (std::vector<long> &inputVals, int& currSteps, long lastDir) {
-	// try inputs 1, 2, 3, 4 (N, S, W, E)
+bool runMaze (std::vector<long> &inputVals, int& currSteps, int lastDir) {
 	long output;
-	for (long i = 1; i <= 3; i += 2) {
+	for (int i = 1; i <= 3; i += 2) {	// north and west
 		if (i != lastDir) {
 			std::vector<long> oldInput = inputVals;
 			output = processInput (inputVals, i);
@@ -81,7 +84,7 @@ bool runMaze (std::vector<long> &inputVals, int& currSteps, long lastDir) {
 		}
 	}
 
-	for (long i = 2; i <= 4; i += 2) {
+	for (int i = 2; i <= 4; i += 2) {	// south and east
 		if (i != lastDir) {
 			std::vector<long> oldInput = inputVals;
 			output = processInput (inputVals, i);
@@ -103,19 +106,49 @@ bool runMaze (std::vector<long> &inputVals, int& currSteps, long lastDir) {
 }
 
 /*
- * Node struct to track visited positions during iterative BFS relative to
- * the starting point
+ * Function class for hash of pairs (x, y) of visited points for BFS
  */
-struct Node {
-	int x;
-	int y;
+class HashCoords {
+public:
+	std::size_t operator()(const std::pair<int, int> &p) const {
+		return p.first * 31 + p.second;
+	}
 };
 
-int runDepth (std::vector<long> inputVals) {
-	std::deque<std::vector<long>> queue;
-	queue.push_back(inputVals);
-	while (queue.size()) {
+/*
+ * Helper function to update coordinates (x, y)
+ */
+void updatePos (std::pair<int, int> &p, int dir) {
+	if (dir == 1) {
+		++p.second;
+	}
+	else if (dir == 2) {
+		--p.second;
+	}
+	else if (dir == 3) {
+		--p.first;
+	}
+	else {	// dir == 4
+		++p.first;
+	}
+}
 
+int runDepth (std::vector<long> inputVals) {
+	std::deque<std::pair<std::pair<int, int>, std::vector<long>>> queue;
+	std::unordered_map<std::pair<int, int>, bool, HashCoords> visited;
+	std::pair<int, int> currPos = {0, 0};
+	queue.push_back({currPos, inputVals});
+	while (queue.size()) {
+		visited[currPos] = true;
+		for (int i = 1; i <= 4; ++i) {
+			currPos = queue.front().first;
+			updatePos(currPos, i);
+			std::vector<long> currVals = queue.front().second;
+			long output = processInput(currVals, 1);
+			if (output) {
+				queue.push_back({currPos, currVals});
+			}
+		}
 	}
 	return 0;
 }
