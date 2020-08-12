@@ -142,12 +142,14 @@ int runDepth (std::vector<long> inputVals) {
 		visited[currPos] = true;
 		for (int i = 1; i <= 4; ++i) {
 			currPos = queue.front().first;
+			visited[currPos] = true;
 			updatePos(currPos, i);
 			std::vector<long> currVals = queue.front().second;
 			long output = processInput(currVals, 1);
-			if (output) {
+			if (output && !visited[currPos]) {
 				queue.push_back({currPos, currVals});
 			}
+			queue.pop_front();
 		}
 	}
 	return 0;
