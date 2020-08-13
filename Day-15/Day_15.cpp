@@ -134,6 +134,7 @@ void updatePos (std::pair<int, int> &p, int dir) {
 }
 
 int runDepth (std::vector<long> inputVals) {
+	std::cout << 1 << std::endl;
 	std::deque<std::pair<std::pair<int, int>, std::vector<long>>> queue;
 	std::unordered_map<std::pair<int, int>, bool, HashCoords> visited;
 	std::pair<int, int> currPos = {0, 0};
