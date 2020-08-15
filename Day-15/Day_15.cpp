@@ -134,25 +134,22 @@ void updatePos (std::pair<int, int> &p, int dir) {
 }
 
 int runDepth (std::vector<long> inputVals) {
-	std::cout << 1 << std::endl;
 	std::deque<std::pair<std::pair<int, int>, std::vector<long>>> queue;
 	std::unordered_map<std::pair<int, int>, int, HashCoords> visited;
 	std::pair<int, int> currPos = {0, 0};
 	queue.push_back({currPos, inputVals});
-
 	while (queue.size()) {
 		++visited[currPos];
 		for (int i = 1; i <= 4; ++i) {
 			currPos = queue.front().first;
-			visited[currPos] = 1;
 			updatePos(currPos, i);
 			std::vector<long> currVals = queue.front().second;
 			long output = processInput(currVals, 1);
 			if (output && !visited[currPos]) {
 				queue.push_back({currPos, currVals});
 			}
-			queue.pop_front();
 		}
+		queue.pop_front();
 	}
 	return 0;
 }
