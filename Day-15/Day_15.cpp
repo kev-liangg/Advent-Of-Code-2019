@@ -61,7 +61,7 @@ int main () {
     std::cout << "Part 1 Solution: " << currSteps << std::endl;
 
     /* Part 2: -------------------------------------------------------------- */
-    runDepth(inputVals);
+    std::cout << "Part 2 Solution: " << runDepth(inputVals) << std::endl;
 }
 
 bool runMaze (std::vector<long> &inputVals, int& currSteps, int lastDir) {
@@ -138,20 +138,35 @@ int runDepth (std::vector<long> inputVals) {
 	std::unordered_map<std::pair<int, int>, int, HashCoords> visited;
 	std::pair<int, int> currPos = {0, 0};
 	queue.push_back({currPos, inputVals});
+
+	int maxDepth = 0;
+
 	while (queue.size()) {
-		++visited[currPos];
+		currPos = queue.front().first;
+		int& currDepth = visited[currPos];
+
+		if (currDepth > maxDepth) {
+			maxDepth = currDepth;
+		}
+
 		for (int i = 1; i <= 4; ++i) {
 			currPos = queue.front().first;
 			updatePos(currPos, i);
 			std::vector<long> currVals = queue.front().second;
 			long output = processInput(currVals, 1);
+
+			std::cout << currPos.first << " " << currPos.second << " " << visited[currPos] << std::endl;
+
+
 			if (output && !visited[currPos]) {
 				queue.push_back({currPos, currVals});
+				++visited[currPos];
 			}
 		}
 		queue.pop_front();
 	}
-	return 0;
+
+	return maxDepth;
 }
 
 long processInput (std::vector<long> &inputVals, long input) {
