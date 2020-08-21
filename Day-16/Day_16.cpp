@@ -35,8 +35,12 @@ void transformList (std::vector<int> &list) {
 	// generate all n values of the new list
 	std::vector<int> temp;
 	temp.reserve(list.size());
+
 	int newVal;
+	std::vector<int> pattern;
+	pattern.reserve(list.size());
 	for (size_t i = 0; i < list.size(); ++i) {
+		generatePattern(pattern, i);
 		// todo: generate the new val using accumulate+pattern
 		temp.push_back(newVal);
 	}
