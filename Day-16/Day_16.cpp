@@ -29,6 +29,13 @@ int main () {
 	for (char s : input) {
 		list.push_back(s - 48);
 	}
+
+	transformList (list);
+	std::cout << "Part 1 Solution: ";
+	for (int i = 0; i < 8; ++i) {
+		std::cout << list[i];
+	}
+	std::cout << std::endl;
 }
 
 void transformList (std::vector<int> &list) {
@@ -41,7 +48,11 @@ void transformList (std::vector<int> &list) {
 	pattern.reserve(list.size());
 	for (size_t i = 0; i < list.size(); ++i) {
 		generatePattern(pattern, i);
-		// todo: generate the new val using accumulate+pattern
+		std::vector<int>::iterator itP = pattern.begin();
+		std::vector<int>::iterator itL = list.begin();
+		while (itP != pattern.end()) {
+			newVal += *itP * *itL;
+		}
 		temp.push_back(newVal);
 	}
 }
