@@ -54,6 +54,7 @@ void transformList (std::vector<int> &list) {
 			newVal += *itP * *itL;
 		}
 		temp.push_back(newVal);
+		newVal = 0;
 	}
 }
 
