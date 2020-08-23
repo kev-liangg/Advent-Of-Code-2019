@@ -30,7 +30,10 @@ int main () {
 		list.push_back(s - 48);
 	}
 
-	transformList (list);
+	for (int i = 0; i < 100; ++i) {
+		transformList (list);
+	}
+
 	std::cout << "Part 1 Solution: ";
 	for (int i = 0; i < 8; ++i) {
 		std::cout << list[i];
