@@ -46,19 +46,21 @@ void transformList (std::vector<int> &list) {
 	std::vector<int> temp;
 	temp.reserve(list.size());
 
-	int newVal;
-	std::vector<int> pattern;
-	pattern.reserve(list.size());
+	int newVal = 0;
+	std::vector<int> pattern (list.size());
 	for (size_t i = 0; i < list.size(); ++i) {
 		generatePattern(pattern, i);
 		std::vector<int>::iterator itP = pattern.begin();
 		std::vector<int>::iterator itL = list.begin();
 		while (itP != pattern.end()) {
 			newVal += *itP * *itL;
+			++itP;
+			++itL;
 		}
-		temp.push_back(newVal);
+		temp.push_back(std::abs(newVal % 10));
 		newVal = 0;
 	}
+	std::copy (temp.begin(), temp.end(), list.begin());
 }
 
 void generatePattern (std::vector<int> &pattern, size_t pos) {
@@ -67,9 +69,9 @@ void generatePattern (std::vector<int> &pattern, size_t pos) {
 	std::deque<int> temp;
 	size_t i = 0;
 	int baseIndex = 0;
-	while (i < pattern.size()) {
+	while (i <= pattern.size()) {
 		// expand base pattern from position
-		for (size_t j = 0; j <= pos; ++j) {
+		for (size_t j = 0; j <= pos && i <= pattern.size(); ++j) {
 			temp.push_back(base[baseIndex % 4]);
 			++i;
 		}
