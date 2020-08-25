@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <deque>
+#include <iterator>
 
 /*
  * Apply the transformation pattern on the list of numbers
@@ -39,6 +40,14 @@ int main () {
 		std::cout << list[i];
 	}
 	std::cout << std::endl;
+
+	// part 2: repeat input 10,000 times
+	std::vector<int> list2;
+	list2.reserve (list.size() * 10000);
+	std::back_insert_iterator<std::vector<int>> it2 (list2);
+	for (int i = 0; i < 10000; ++i) {
+		std::copy (list.begin(), list.end(), it2);
+	}
 }
 
 void transformList (std::vector<int> &list) {
