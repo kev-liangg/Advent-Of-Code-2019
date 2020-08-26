@@ -48,6 +48,10 @@ int main () {
 	for (int i = 0; i < 10000; ++i) {
 		std::copy (list.begin(), list.end(), it2);
 	}
+
+	for (int i = 0; i < 100; ++i) {
+		transformList (list2);
+	}
 }
 
 void transformList (std::vector<int> &list) {
