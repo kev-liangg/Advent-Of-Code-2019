@@ -9,6 +9,7 @@
 #include <vector>
 #include <deque>
 #include <iterator>
+#include <cmath>
 
 /*
  * Apply the transformation pattern on the list of numbers
@@ -19,6 +20,11 @@ void transformList (std::vector<int> &list);
  * Generate the pattern for the applied transformation for each position
  */
 void generatePattern (std::vector<int> &pattern, size_t pos);
+
+/*
+ * Generate the 7-digit offset value from the first seven digits of pattern
+ */
+int parseOffset (std::vector<int> &pattern);
 
 int main () {
 	// generate initial list by parsing complete string
@@ -92,4 +98,15 @@ void generatePattern (std::vector<int> &pattern, size_t pos) {
 	}
 	temp.pop_front();
 	std::copy (temp.begin(), temp.end(), pattern.begin());
+}
+
+/*
+ * Generate the 7-digit offset value from the first seven digits of pattern
+ */
+int parseOffset (std::vector<int> &pattern) {
+	int offset = 0;
+	for (int i = 0; i < 7; ++i) {
+		offset += pattern[i] * std::pow(10, i);
+	}
+	return offset;
 }
