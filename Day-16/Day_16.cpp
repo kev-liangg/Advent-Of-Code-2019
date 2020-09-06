@@ -32,6 +32,7 @@ int main () {
 	std::string input;
 	std::getline (inFile, input);
 	std::vector<int> list;
+	std::vector<int> listCopy = list;
 	list.reserve (input.size());
 	for (char s : input) {
 		list.push_back(s - 48);
@@ -49,10 +50,11 @@ int main () {
 
 	// part 2: repeat input 10,000 times
 	std::vector<int> list2;
-	list2.reserve (list.size() * 10000);
+	int offset = parseOffset(list2);
+	list2.reserve (listCopy.size() * 10000);
 	std::back_insert_iterator<std::vector<int>> it2 (list2);
 	for (int i = 0; i < 10000; ++i) {
-		std::copy (list.begin(), list.end(), it2);
+		std::copy (listCopy.begin(), listCopy.end(), it2);
 	}
 
 	for (int i = 0; i < 100; ++i) {
